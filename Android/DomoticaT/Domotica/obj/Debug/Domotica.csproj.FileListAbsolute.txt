@@ -1,0 +1,47 @@
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\obj\Debug\Domotica.csprojResolveAssemblyReference.cache
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\bin\Debug\Domotica.dll
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\bin\Debug\Domotica.pdb
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\bin\Debug\Domotica.Domotica.apk
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\bin\Debug\Domotica.Domotica-Signed.apk
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\obj\Debug\Domotica.dll
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\obj\Debug\Domotica.pdb
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\obj\Debug\android\bin\Domotica.Domotica.apk
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\obj\Debug\res\layout\main.xml
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\obj\Debug\res\values\strings.xml
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\obj\Debug\res\drawable\icon.png
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\obj\Debug\res\menu\menu.xml
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\obj\Debug\R.cs.flag
+\\Mac\Home\Documents\Visual Studio 2013\Projects\Domotica\Domotica\obj\Debug\uploadflags.txt
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\bin\Debug\Domotica.Domotica.apk
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\bin\Debug\Domotica.Domotica-Signed.apk
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\Domotica.csprojResolveAssemblyReference.cache
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\android\bin\Domotica.Domotica.apk
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\res\layout\main.xml
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\res\values\strings.xml
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\res\drawable\icon.png
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\res\menu\menu.xml
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\R.cs.flag
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\uploadflags.txt
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\bin\Debug\DomoticaT.dll
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\bin\Debug\DomoticaT.pdb
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\DomoticaT.dll
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\DomoticaT.pdb
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\obj\Debug\DomoticaT.dll.mdb
+Y:\CloudStation\Development\Xamarin\Domotica\Domotica\bin\Debug\DomoticaT.dll.mdb
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\bin\Debug\DomoticaT.dll
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\bin\Debug\DomoticaT.pdb
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\bin\Debug\Domotica.Domotica.apk
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\bin\Debug\Domotica.Domotica-Signed.apk
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\Domotica.csprojResolveAssemblyReference.cache
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\Domotica.csproj.CoreCompileInputs.cache
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\DomoticaT.dll
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\DomoticaT.pdb
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\android\bin\Domotica.Domotica.apk
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\res\layout\main.xml
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\res\values\strings.xml
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\res\drawable\icon.png
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\res\menu\menu.xml
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\R.cs.flag
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\uploadflags.txt
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\bin\Debug\DomoticaT.dll.mdb
+D:\School\Jaar1\Projecten\NHL-Arduino\NHL-Arduino\Android\DomoticaT\Domotica\obj\Debug\android\assets\DomoticaT.dll.mdb
