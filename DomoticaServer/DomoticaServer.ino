@@ -46,6 +46,16 @@
 byte mac[] = { 0x40, 0x6c, 0x8f, 0x36, 0x84, 0x8a }; // Ethernet adapter shield S. Oosterhaven
 int ethPort = 3300;                                  // Take a free port (check your router)
 
+// the dns server ip
+IPAddress dnServer(192, 168, 0, 254);
+// the router's gateway address:
+IPAddress gateway(192, 168, 0, 254);
+// the subnet:
+IPAddress subnet(255, 255, 255, 0);
+
+//the IP address is dependent on your network
+IPAddress ip(192, 168, 0, 16);
+
 #define RFPin        3  // output, pin to control the RF-sender (and Click-On Click-Off-device)
 #define lowPin       5  // output, always LOW
 #define highPin      6  // output, always HIGH
@@ -88,12 +98,18 @@ void setup()
    digitalWrite(infoPin, LOW);
 
    //Try to get an IP address from the DHCP server.
-   if (Ethernet.begin(mac) == 0)
+   /*if (Ethernet.begin(mac) == 0)
    {
       Serial.println("Could not obtain IP-address from DHCP -> do nothing");
       while (true){     // no point in carrying on, so do nothing forevermore; check your router
       }
    }
+   */
+  // initialize the ethernet device
+  Ethernet.begin(mac, ip, dnServer, gateway, subnet);
+  //print out the IP address
+  Serial.print("IP = ");
+  Serial.println(Ethernet.localIP());
    
    Serial.print("LED (for connect-state and pin-state) on pin "); Serial.println(ledPin);
    Serial.print("Input switch on pin "); Serial.println(switchPin);
@@ -265,7 +281,8 @@ String IPAddressToString(IPAddress address)
            String(address[3]);
 }
 
-// Returns B-class network-id: 192.168.1.3 -> 1)
+// Returns C-class network-id: 192.168.1.3 -> 1)
+// DIT IS EEN C-KLASSE NETWERK!!! ANDERS WAS HET SUBNET 255.255.0.0
 int getIPClassB(IPAddress address)
 {
     return address[2];
