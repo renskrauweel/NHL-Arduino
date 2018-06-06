@@ -40,21 +40,21 @@
 #include <Ethernet.h>             // Ethernet library (use Ethernet2.h for new ethernet shield v2)
 #include <NewRemoteTransmitter.h> // Remote Control, Gamma, APA3
 #include <RemoteTransmitter.h>    // Remote Control, Action, old model
-//#include <RCSwitch.h>           // Remote Control, Action, new model
+#include <RCSwitch.h>           // Remote Control, Action, new model
 
 // Set Ethernet Shield MAC address  (check yours)
 byte mac[] = { 0x40, 0x6c, 0x8f, 0x36, 0x84, 0x8a }; // Ethernet adapter shield S. Oosterhaven
 int ethPort = 3300;                                  // Take a free port (check your router)
 
 // the dns server ip
-IPAddress dnServer(192, 168, 0, 254);
+IPAddress dnServer(192, 168, 4, 254);
 // the router's gateway address:
-IPAddress gateway(192, 168, 0, 254);
+IPAddress gateway(192, 168, 4, 254);
 // the subnet:
 IPAddress subnet(255, 255, 255, 0);
 
 //the IP address is dependent on your network
-IPAddress ip(192, 168, 0, 16);
+IPAddress ip(192, 168, 4, 20);
 
 #define RFPin        3  // output, pin to control the RF-sender (and Click-On Click-Off-device)
 #define lowPin       5  // output, always LOW
@@ -64,15 +64,29 @@ IPAddress ip(192, 168, 0, 16);
 #define infoPin      9  // output, more information
 #define analogPin    0  // sensor value
 
+// socket protocol definements
+#define packageSensorLight 1
+#define packageSensorTemperature 2
+#define packagePowerOutlet 3
+
 EthernetServer server(ethPort);              // EthernetServer instance (listening on port <ethPort>).
 NewRemoteTransmitter apa3Transmitter(unitCodeApa3, RFPin, 260, 3);  // APA3 (Gamma) remote, use pin <RFPin> 
 ActionTransmitter actionTransmitter(RFPin);  // Remote Control, Action, old model (Impulse), use pin <RFPin>
-//RCSwitch mySwitch = RCSwitch();            // Remote Control, Action, new model (on-off), use pin <RFPin>
+RCSwitch mySwitch = RCSwitch();            // Remote Control, Action, new model (on-off), use pin <RFPin>
 
 char actionDevice = 'A';                 // Variable to store Action Device id ('A', 'B', 'C')
 bool pinState = false;                   // Variable to store actual pin state
 bool pinChange = false;                  // Variable to store actual pin change
-int  sensorValue = 0;                    // Variable to store actual sensor value
+//int  sensorValue = 0;                    // Variable to store actual sensor value
+
+// === LDR + Humidity Sensor includes ===
+#include "dht.h"
+#define dht_apin A0 // Analog Pin sensor is connected to
+
+dht DHT;
+
+int sensorPin = A1; // select the input pin for LDR
+int sensorValue = 0; // variable to store the value coming from the LDR sensor
 
 void setup()
 {
@@ -96,6 +110,14 @@ void setup()
    digitalWrite(RFPin, LOW);
    digitalWrite(ledPin, LOW);
    digitalWrite(infoPin, LOW);
+
+   // Sensor pin
+    pinMode(9, OUTPUT);
+    digitalWrite(9,HIGH);
+
+    // Transmitter is connected to Arduino RFPin  
+    mySwitch.enableTransmit(RFPin);
+    
 
    //Try to get an IP address from the DHCP server.
    /*if (Ethernet.begin(mac) == 0)
@@ -156,12 +178,29 @@ void loop()
       }
    
       // Execute when byte is received.
-      while (ethernetClient.available())
+      /*while (ethernetClient.available())
       {
          char inByte = ethernetClient.read();   // Get byte from the client.
          executeCommand(inByte);                // Wait for command to execute
          inByte = NULL;                         // Reset the read byte.
-      } 
+      } */
+      while (ethernetClient.available())
+      {
+         byte bytes[]{};
+         int counter = 0;
+         while(ethernetClient.read() != -1)
+         {
+           bytes[counter] = ethernetClient.read();   // Get byte from the client.
+           counter++;
+         }
+         Serial.println("Byte array:");
+         for(int i = 0; i < sizeof(bytes); i++) {
+            Serial.print(bytes[i]);
+         }
+         executeCommandByByteArray(bytes);                // Wait for command to execute
+         memset(bytes,0,sizeof(bytes));                         // Reset the read byte.
+         counter = 0;
+      }
    }
    Serial.println("Application disonnected");
 }
@@ -180,6 +219,7 @@ void switchDefault(bool state)
 // Implementation of (simple) protocol between app and Arduino
 // Request (from app) is single char ('a', 's', 't', 'i' etc.)
 // Response (to app) is 4 chars  (not all commands demand a response)
+/*
 void executeCommand(char cmd)
 {     
          char buf[4] = {'\0', '\0', '\0', '\0'};
@@ -199,13 +239,59 @@ void executeCommand(char cmd)
          case 't': // Toggle state; If state is already ON then turn it OFF
             if (pinState) { pinState = false; Serial.println("Set pin state to \"OFF\""); }
             else { pinState = true; Serial.println("Set pin state to \"ON\""); }  
-            pinChange = true; 
+            pinChange = true;
             break;
          case 'i':    
             digitalWrite(infoPin, HIGH);
             break;
          default:
             digitalWrite(infoPin, LOW);
+         }
+}*/
+// custom socket protocol handling
+void executeCommandByByteArray(char cmd[])
+{     
+         char buf[4] = {'\0', '\0', '\0', '\0'};
+
+         // Command protocol
+         Serial.print("["); Serial.print(cmd); Serial.print("] -> ");
+         switch (cmd[0]) {
+         case packageSensorLight: // Report LDR sensor value to the app  
+            intToCharBuf(getLDRValue(), buf, 4);                // convert to charbuffer
+            server.write(buf/*, 4*/);                             // response is always 4 chars (\n included)
+            Serial.print("Sensor: "); Serial.println(buf);
+            break;
+         case packageSensorTemperature: // Report Temperature sensor value to the app  
+            //intToCharBuf(getTemperatureValue(), buf, 4);                // convert to charbuffer
+            server.write(buf/*, 4*/);                             // response is always 4 chars (\n included)
+            Serial.print("Sensor: "); Serial.println(buf);
+            break;
+         /*case 's': // Report switch state to the app
+            if (pinState) { server.write(" ON\n"); Serial.println("Pin state is ON"); }  // always send 4 chars
+            else { server.write("OFF\n"); Serial.println("Pin state is OFF"); }
+            break;*/
+         case packagePowerOutlet: // Toggle state; If state is already ON then turn it OFF
+            if (pinState) { 
+                pinState = false;
+                Serial.println("Set pin state to \"OFF\""); 
+                // Send to RF power outlet
+                // off
+                mySwitch.send(6362628, 24);
+            }
+            else { 
+              pinState = true; 
+              Serial.println("Set pin state to \"ON\"");
+              // Send to RF power outlet
+              // on
+              mySwitch.send(6362636, 24);
+            }  
+            pinChange = true;
+            break;
+         /*case 'i':    
+            digitalWrite(infoPin, HIGH);
+            break;
+         default:
+            digitalWrite(infoPin, LOW);*/
          }
 }
 
@@ -300,4 +386,21 @@ int getIPComputerNumberOffset(IPAddress address, int offset)
     return getIPComputerNumber(address) - offset;
 }
 
+int getLDRValue()
+{
+  return analogRead(sensorPin); // read the value from the LDR sensor
+}
 
+int getHumidityValue()
+{
+  DHT.read11(dht_apin);
+  
+  return DHT.humidity;
+}
+
+int getTemperatureValue()
+{
+  DHT.read11(dht_apin);
+  
+  return DHT.temperature;
+}
