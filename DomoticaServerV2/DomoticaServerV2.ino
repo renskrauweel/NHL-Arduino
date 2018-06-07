@@ -38,8 +38,8 @@
 // Include files.
 #include <SPI.h>                  // Ethernet shield uses SPI-interface
 #include <Ethernet.h>             // Ethernet library (use Ethernet2.h for new ethernet shield v2)
-#include <NewRemoteTransmitter.h> // Remote Control, Gamma, APA3
-#include <RemoteTransmitter.h>    // Remote Control, Action, old model
+//#include <NewRemoteTransmitter.h> // Remote Control, Gamma, APA3
+//#include <RemoteTransmitter.h>    // Remote Control, Action, old model
 #include <RCSwitch.h>           // Remote Control, Action, new model
 
 // Set Ethernet Shield MAC address  (check yours)
@@ -70,14 +70,18 @@ IPAddress ip(192, 168, 4, 20);
 #define packagePowerOutlet 3
 
 EthernetServer server(ethPort);              // EthernetServer instance (listening on port <ethPort>).
-NewRemoteTransmitter apa3Transmitter(unitCodeApa3, RFPin, 260, 3);  // APA3 (Gamma) remote, use pin <RFPin> 
-ActionTransmitter actionTransmitter(RFPin);  // Remote Control, Action, old model (Impulse), use pin <RFPin>
+//NewRemoteTransmitter apa3Transmitter(unitCodeApa3, RFPin, 260, 3);  // APA3 (Gamma) remote, use pin <RFPin> 
+//ActionTransmitter actionTransmitter(RFPin);  // Remote Control, Action, old model (Impulse), use pin <RFPin>
 RCSwitch mySwitch = RCSwitch();            // Remote Control, Action, new model (on-off), use pin <RFPin>
 
 char actionDevice = 'A';                 // Variable to store Action Device id ('A', 'B', 'C')
 bool pinState = false;                   // Variable to store actual pin state
 bool pinChange = false;                  // Variable to store actual pin change
 //int  sensorValue = 0;                    // Variable to store actual sensor value
+
+bool RFOUTLET1ISON = false;
+bool RFOUTLET2ISON = false;
+bool RFOUTLET3ISON = false;
 
 const int RFOUTLET1ON = 6362636;
 const int RFOUTLET1OFF = 6362628;
@@ -193,7 +197,7 @@ void loop()
       } */
       while (ethernetClient.available())
       {
-         byte bytes[]{};
+         byte bytes[4];
          int counter = 0;
          while(ethernetClient.read() != -1)
          {
@@ -214,11 +218,11 @@ void loop()
 
 // Choose and switch your Kaku device, state is true/false (HIGH/LOW)
 void switchDefault(bool state)
-{   
+{   /*
    apa3Transmitter.sendUnit(0, state);          // APA3 Kaku (Gamma)                
    delay(100);
    actionTransmitter.sendSignal(unitCodeActionOld, actionDevice, state);  // Action Kaku, old model
-   delay(100);
+   delay(100);*/
    //mySwitch.send(2210410 + state, 24);  // tricky, false = 0, true = 1  // Action Kaku, new model
    //delay(100);
 }
@@ -228,17 +232,17 @@ void executeCommandByByteArray(byte cmd[])
 {     
          // Command protocol
          //Serial.print("["); Serial.print(cmd); Serial.print("] -> ");
-         byte byteBuffer[] = {};
+         byte byteBuffer[4];
          switch (cmd[0]) {
          case packageSensorLight: // Report LDR sensor value to the app  
             byteBuffer[0] = (byte)packageSensorLight;
-            byteBuffer[1] = (byte)getLDRValue();
+            byteBuffer[1] = (byte)map(getLDRValue(), 0, 1023, 0, 255);
             server.write((byte)byteBuffer);
             Serial.print("Sensor LDR: "); Serial.println(byteBuffer[1]);
             break;
          case packageSensorTemperature: // Report Temperature sensor value to the app  
             byteBuffer[0] = (byte)packageSensorTemperature;
-            byteBuffer[1] = (byte)getTemperatureValue();
+            byteBuffer[1] = (byte)map(getTemperatureValue(), 0, 1023, 0, 255);
             server.write((byte)byteBuffer);
             Serial.print("Sensor Temperature: "); Serial.println(byteBuffer[1]);
             break;
@@ -247,26 +251,57 @@ void executeCommandByByteArray(byte cmd[])
             if(cmd[1] == 1) {
               // on
               mySwitch.send(RFOUTLET1ON, 24);
+              Serial.print("RF Power outlet1 = ON");
+              RFOUTLET1ISON = true;
             } else {
               // off
               mySwitch.send(RFOUTLET1OFF, 24);
+              Serial.print("RF Power outlet1 = OFF");
+              RFOUTLET1ISON = false;
             }
             // Power outlet 2
             if(cmd[2] == 1) {
               // on
               mySwitch.send(RFOUTLET2ON, 24);
+              Serial.print("RF Power outlet2 = ON");
+              RFOUTLET2ISON = true;
             } else {
               // off
               mySwitch.send(RFOUTLET2OFF, 24);
+              Serial.print("RF Power outlet2 = OFF");
+              RFOUTLET2ISON = false;
             }
             // Power outlet 3
             if(cmd[3] == 1) {
               // on
               mySwitch.send(RFOUTLET3ON, 24);
+              Serial.print("RF Power outlet3 = ON");
+              RFOUTLET3ISON = true;
             } else {
               // off
               mySwitch.send(RFOUTLET3OFF, 24);
+              Serial.print("RF Power outlet3 = OFF");
+              RFOUTLET3ISON = false;
             }
+
+            // Send current RF power outlet states to client
+            byteBuffer[0] = (byte)packageSensorLight;
+            if(RFOUTLET1ISON == true) {
+              byteBuffer[1] = (byte)1;
+            } else {
+              byteBuffer[1] = (byte)0;
+            }
+            if(RFOUTLET2ISON == true) {
+              byteBuffer[2] = (byte)1;
+            } else {
+              byteBuffer[2] = (byte)0;
+            }
+            if(RFOUTLET3ISON == true) {
+              byteBuffer[3] = (byte)1;
+            } else {
+              byteBuffer[3] = (byte)0;
+            }
+            server.write((byte)byteBuffer);
             break;
          }
 }
