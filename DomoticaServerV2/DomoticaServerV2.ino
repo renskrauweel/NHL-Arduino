@@ -83,12 +83,12 @@ bool RFOUTLET1ISON = false;
 bool RFOUTLET2ISON = false;
 bool RFOUTLET3ISON = false;
 
-const int RFOUTLET1ON = 6362636;
-const int RFOUTLET1OFF = 6362628;
-const int RFOUTLET2ON = 6362636;
-const int RFOUTLET2OFF = 6362628;
-const int RFOUTLET3ON = 6362636;
-const int RFOUTLET3OFF = 6362628;
+const int RFOUTLET1ON = 6360636;
+const int RFOUTLET1OFF = 6360628;
+const int RFOUTLET2ON = 6360634;
+const int RFOUTLET2OFF = 6360626;
+const int RFOUTLET3ON = 6360633;
+const int RFOUTLET3OFF = 6360625;
 
 // === LDR + Humidity Sensor includes ===
 #include "dht.h"
@@ -128,7 +128,6 @@ void setup()
 
     // Transmitter is connected to Arduino RFPin  
     mySwitch.enableTransmit(RFPin);
-    
 
    //Try to get an IP address from the DHCP server.
    if (Ethernet.begin(mac) == 0)
@@ -195,23 +194,20 @@ void loop()
          executeCommand(inByte);                // Wait for command to execute
          inByte = NULL;                         // Reset the read byte.
       } */
+      int counter = 0;
+      byte bytes[4];
       while (ethernetClient.available())
       {
-         byte bytes[4];
-         int counter = 0;
-         while(ethernetClient.read() != -1)
-         {
-           bytes[counter] = ethernetClient.read();   // Get byte from the client.
-           counter++;
-         }
-         Serial.println("Byte array:");
-         for(int i = 0; i < sizeof(bytes); i++) {
-            Serial.print(bytes[i]);
-         }
-         executeCommandByByteArray(bytes);                // Wait for command to execute
-         memset(bytes,0,sizeof(bytes));                         // Reset the read byte.
-         counter = 0;
+         bytes[counter] = (int)ethernetClient.read();   // Get byte from the client.
+         counter++;
       }
+      Serial.println("Byte array:");
+       for(int i = 0; i < sizeof(bytes); i++) {
+          Serial.print(bytes[i]);
+       }
+       executeCommandByByteArray(bytes);                // Wait for command to execute
+       memset(bytes,0,sizeof(bytes));                         // Reset the read byte.
+       counter = 0;
    }
    Serial.println("Application disonnected");
 }
@@ -233,18 +229,21 @@ void executeCommandByByteArray(byte cmd[])
          // Command protocol
          //Serial.print("["); Serial.print(cmd); Serial.print("] -> ");
          byte byteBuffer[4];
+         int sensorVal;
          switch (cmd[0]) {
-         case packageSensorLight: // Report LDR sensor value to the app  
+         case packageSensorLight: // Report LDR sensor value to the app
+            sensorVal = getLDRValue();
             byteBuffer[0] = (byte)packageSensorLight;
-            byteBuffer[1] = (byte)map(getLDRValue(), 0, 1023, 0, 255);
+            byteBuffer[1] = (byte)map(sensorVal, 0, 1023, 0, 255);
             server.write((byte)byteBuffer);
-            Serial.print("Sensor LDR: "); Serial.println(byteBuffer[1]);
+            Serial.print("Sensor LDR: "); Serial.println(sensorVal);
             break;
-         case packageSensorTemperature: // Report Temperature sensor value to the app  
+         case packageSensorTemperature: // Report Temperature sensor value to the app
+            sensorVal = getTemperatureValue();
             byteBuffer[0] = (byte)packageSensorTemperature;
-            byteBuffer[1] = (byte)map(getTemperatureValue(), 0, 1023, 0, 255);
+            byteBuffer[1] = (byte)map(sensorVal, 0, 1023, 0, 255);
             server.write((byte)byteBuffer);
-            Serial.print("Sensor Temperature: "); Serial.println(byteBuffer[1]);
+            Serial.print("Sensor Temperature: "); Serial.println(sensorVal);
             break;
          case packagePowerOutlet:
             // Power outlet 1
@@ -301,7 +300,8 @@ void executeCommandByByteArray(byte cmd[])
             } else {
               byteBuffer[3] = (byte)0;
             }
-            server.write((byte)byteBuffer);
+             byte bytebuffer2[] {(byte)3, (byte)1, (byte)0, (byte)0};
+            server.write(byteBuffer, 4);
             break;
          }
 }
