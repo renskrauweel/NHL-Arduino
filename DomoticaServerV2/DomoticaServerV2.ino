@@ -233,74 +233,73 @@ void executeCommandByByteArray(byte cmd[])
          switch (cmd[0]) {
          case packageSensorLight: // Report LDR sensor value to the app
             sensorVal = getLDRValue();
-            byteBuffer[0] = (byte)packageSensorLight;
-            byteBuffer[1] = (byte)map(sensorVal, 0, 1023, 0, 255);
-            server.write((byte)byteBuffer);
+            byteBuffer[0] = packageSensorLight;
+            byteBuffer[1] = map(sensorVal, 0, 1023, 0, 255);
+            server.write(byteBuffer, 4);
             Serial.print("Sensor LDR: "); Serial.println(sensorVal);
             break;
          case packageSensorTemperature: // Report Temperature sensor value to the app
             sensorVal = getTemperatureValue();
-            byteBuffer[0] = (byte)packageSensorTemperature;
-            byteBuffer[1] = (byte)map(sensorVal, 0, 1023, 0, 255);
-            server.write((byte)byteBuffer);
+            byteBuffer[0] = packageSensorTemperature;
+            byteBuffer[1] = map(sensorVal, 0, 1023, 0, 255);
+            server.write(byteBuffer, 4);
             Serial.print("Sensor Temperature: "); Serial.println(sensorVal);
             break;
          case packagePowerOutlet:
             // Power outlet 1
             if(cmd[1] == 1) {
               // on
-              mySwitch.send(RFOUTLET1ON, 24);
+              mySwitch.send(6360636, 24);
               Serial.print("RF Power outlet1 = ON");
               RFOUTLET1ISON = true;
             } else {
               // off
-              mySwitch.send(RFOUTLET1OFF, 24);
+              mySwitch.send(6360628, 24);
               Serial.print("RF Power outlet1 = OFF");
               RFOUTLET1ISON = false;
             }
             // Power outlet 2
             if(cmd[2] == 1) {
               // on
-              mySwitch.send(RFOUTLET2ON, 24);
+              mySwitch.send(6360634, 24);
               Serial.print("RF Power outlet2 = ON");
               RFOUTLET2ISON = true;
             } else {
               // off
-              mySwitch.send(RFOUTLET2OFF, 24);
+              mySwitch.send(6360626, 24);
               Serial.print("RF Power outlet2 = OFF");
               RFOUTLET2ISON = false;
             }
             // Power outlet 3
             if(cmd[3] == 1) {
               // on
-              mySwitch.send(RFOUTLET3ON, 24);
+              mySwitch.send(6360633, 24);
               Serial.print("RF Power outlet3 = ON");
               RFOUTLET3ISON = true;
             } else {
               // off
-              mySwitch.send(RFOUTLET3OFF, 24);
+              mySwitch.send(6360625, 24);
               Serial.print("RF Power outlet3 = OFF");
               RFOUTLET3ISON = false;
             }
 
             // Send current RF power outlet states to client
-            byteBuffer[0] = (byte)packageSensorLight;
+            byteBuffer[0] = packageSensorLight;
             if(RFOUTLET1ISON == true) {
-              byteBuffer[1] = (byte)1;
+              byteBuffer[1] = 1;
             } else {
-              byteBuffer[1] = (byte)0;
+              byteBuffer[1] = 0;
             }
             if(RFOUTLET2ISON == true) {
-              byteBuffer[2] = (byte)1;
+              byteBuffer[2] = 1;
             } else {
-              byteBuffer[2] = (byte)0;
+              byteBuffer[2] = 0;
             }
             if(RFOUTLET3ISON == true) {
-              byteBuffer[3] = (byte)1;
+              byteBuffer[3] = 1;
             } else {
-              byteBuffer[3] = (byte)0;
+              byteBuffer[3] = 0;
             }
-             byte bytebuffer2[] {(byte)3, (byte)1, (byte)0, (byte)0};
             server.write(byteBuffer, 4);
             break;
          }
