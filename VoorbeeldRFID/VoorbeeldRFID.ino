@@ -99,18 +99,24 @@ void executeCommandByByteArray(byte cmd[])
 
 void handleRFID()
 {
-    // Look for new cards
-    if ( ! mfrc522.PICC_IsNewCardPresent())
+    bool isScanned = false;
+    while(!isScanned) {
+      // Look for new cards
+      if ( ! mfrc522.PICC_IsNewCardPresent())
+        return;
+      
+      // Select one of the cards
+      if ( ! mfrc522.PICC_ReadCardSerial())
         return;
 
-    // Select one of the cards
-    if ( ! mfrc522.PICC_ReadCardSerial())
-        return;
-
-    // Show some details of the PICC (that is: the tag/card)
-    Serial.print(F("Card UID:"));
-    dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
-    Serial.println();
+      if(mfrc522.uid.uidByte[0] == 8) { // If a phone
+        Serial.print(F("Card UID:"));
+        dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
+        Serial.println();
+        
+        isScanned = true;
+      }
+    }
 
     // send turn off signal to android app
     byte byteBuffer[4];
