@@ -1,6 +1,7 @@
 #include <Ethernet.h>
 #include <RCSwitch.h>
 #include <MFRC522.h>
+#include <NewPing.h>
 
 //Define packet types here:
 #define TURN_ON_COFFEE 1
@@ -31,10 +32,19 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 MFRC522::MIFARE_Key key;
 //-----
 
+//Ultrasonic distance sensor here
+#define TRIGGER_PIN  7
+#define ECHO_PIN     6
+#define MAX_DISTANCE 200
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+bool cupPresent;
+//-----
+
 void setup()
 {
   pinMode(RELAY_ON_PIN, OUTPUT);
   pinMode(RELAY_COFFEE_PIN, OUTPUT);
+  cupPresent = false;
   
 	Serial.begin(9600);
 	//If ethernetshield cant connect break into loop, startup required
@@ -81,11 +91,21 @@ void loop()
 			switch (buffer[0])
 			{
   			case TURN_ON_COFFEE:
+        val = sonar.ping_cm();
+        Serial.print("Cup distance: ");
+        Serial.print(val);
+        Serial.println("cm");
+        if(val < 20) {
+          cupPresent = true;
+        }
+        
         // Turn on coffee
         digitalWrite(RELAY_ON_PIN, HIGH);
-        delay(60000); // One minute delay
-        digitalWrite(RELAY_COFFEE_PIN, HIGH);
-        delay(500);
+        if(cupPresent) {
+          delay(60000); // One minute delay to warm up coffee machine
+          digitalWrite(RELAY_COFFEE_PIN, HIGH);
+          delay(500); // Relay needs a little delay
+        }
   
         // Handle RFID
         handleRFID();
