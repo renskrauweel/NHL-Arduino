@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ProjectView>ShowAllFiles</ProjectView>
     <AndroidDesignerPreferredDevice>Nexus 4</AndroidDesignerPreferredDevice>
-    <SelectedDevice>Android_Accelerated_Nougat</SelectedDevice>
-    <DefaultDevice>Android_Accelerated_Nougat</DefaultDevice>
+    <SelectedDevice>Android_Accelerated_x86_Oreo</SelectedDevice>
+    <DefaultDevice>Android_Accelerated_x86_Oreo</DefaultDevice>
   </PropertyGroup>
 </Project>
