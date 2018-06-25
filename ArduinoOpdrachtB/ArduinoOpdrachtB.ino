@@ -4,7 +4,7 @@
 #include <NewPing.h>
 
 //Define packet types here:
-#define TURN_ON_COFFEE 1
+#define TURN_ON_COFFEE 0x01
 //-----
 
 //Define pins here:
