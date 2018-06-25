@@ -1,12 +1,15 @@
 #include <Ethernet.h>
 #include <RCSwitch.h>
+#include <MFRC522.h>
 
 //Define packet types here:
-
+#define TURN_ON_COFFEE 1
 //-----
 
 //Define pins here:
 #define SENSOR_PIN 1
+#define RELAY_ON_PIN 4
+#define RELAY_COFFEE_PIN 5
 //-----
 
 //Ethernet shield vars here:
@@ -21,8 +24,18 @@ RCSwitch mySwitch = RCSwitch();
 String RF_CODES[]{ "28", "36", "26", "34", "25", "33" };
 //-----
 
+//RFID here
+constexpr uint8_t RST_PIN = 8;     // Configurable, see typical pin layout above
+constexpr uint8_t SS_PIN = 9;     // Configurable, see typical pin layout above
+MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
+MFRC522::MIFARE_Key key;
+//-----
+
 void setup()
 {
+  pinMode(RELAY_ON_PIN, OUTPUT);
+  pinMode(RELAY_COFFEE_PIN, OUTPUT);
+  
 	Serial.begin(9600);
 	//If ethernetshield cant connect break into loop, startup required
 	if (Ethernet.begin(mac) == 0)
@@ -67,7 +80,21 @@ void loop()
 			//Package type switcher, put the actions for the certain package in its case
 			switch (buffer[0])
 			{
-			
+  			case TURN_ON_COFFEE:
+        // Turn on coffee
+        digitalWrite(RELAY_ON_PIN, HIGH);
+        delay(60000); // One minute delay
+        digitalWrite(RELAY_COFFEE_PIN, HIGH);
+        delay(500);
+  
+        // Handle RFID
+        handleRFID();
+
+        // Turn off coffee
+        digitalWrite(RELAY_ON_PIN, LOW);
+        digitalWrite(RELAY_COFFEE_PIN, LOW);
+        break;
+      
 			default:
 				Serial.println("Invalid package type");
 				break;
@@ -109,4 +136,36 @@ void SwitchOutlet(int outlet, int state)
 	Serial.println(RF_CODES[((outlet - 1) * 2) + state]);
 	Serial.print(code);
 	mySwitch.send(code.toInt(), 24);
+}
+void handleRFID()
+{
+    bool isScanned = false;
+    while(!isScanned) {
+      // Look for new cards
+      if ( ! mfrc522.PICC_IsNewCardPresent())
+        return;
+      
+      // Select one of the cards
+      if ( ! mfrc522.PICC_ReadCardSerial())
+        return;
+
+      if(mfrc522.uid.uidByte[0] == 8) { // If a phone
+        Serial.print(F("Card UID:"));
+        dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
+        Serial.println();
+        
+        isScanned = true;
+      }
+    }
+
+    // send turn off signal to android app
+    byte turnOffData[1];
+    turnOffData[0] = 0;
+    WriteResponse(turnOffData, sizeof(turnOffData), TURN_ON_COFFEE);
+}
+void dump_byte_array(byte *buffer, byte bufferSize) {
+    for (byte i = 0; i < bufferSize; i++) {
+        Serial.print(buffer[i] < 0x10 ? " 0" : " ");
+        Serial.print(buffer[i], HEX);
+    }
 }
