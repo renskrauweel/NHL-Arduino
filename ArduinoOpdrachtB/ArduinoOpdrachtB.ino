@@ -5,6 +5,8 @@
 
 //Define packet types here:
 #define TURN_ON_COFFEE 0x01
+#define TURN_OFF_ALARM 0x02
+#define TURN_ON_LIGHT 0x03
 //-----
 
 //Define pins here:
@@ -92,59 +94,73 @@ void loop()
 			switch (buffer[0])
 			{
   			case TURN_ON_COFFEE:
-        val = sonar.ping_cm();
-        Serial.print("Cup distance: ");
-        Serial.print(val);
-        Serial.println("cm");
-        if(val < 20) {
-          cupPresent = true;
-        }
         
-        // Turn on light with arduino client
-        // Connect to client
-        if (client.connect(CLIENT_IP, 3300)) {
-          Serial.println("connected to client");
-          byte buf[2];
-          buf[0] = 1;
-          buf[1] = 1;
-          WriteResponse(buf, sizeof(buf), 1, true);
-          client.stop();
-        } else {
-          Serial.println("connection failed");
+        if(buffer[1] == 1) {
+          val = sonar.ping_cm();
+          Serial.print("Cup distance: ");
+          Serial.print(val);
+          Serial.println("cm");
+          if(val < 20) {
+            cupPresent = true;
+          }
+
+          // Turn on coffee
+          digitalWrite(RELAY_ON_PIN, HIGH);
+          if(cupPresent) {
+            delay(60000); // One minute delay to warm up coffee machine
+            digitalWrite(RELAY_COFFEE_PIN, HIGH);
+            delay(500); // Relay needs a little delay
+          }
         }
-        
-        // Turn on coffee
-        digitalWrite(RELAY_ON_PIN, HIGH);
-        if(cupPresent) {
-          delay(60000); // One minute delay to warm up coffee machine
-          digitalWrite(RELAY_COFFEE_PIN, HIGH);
-          delay(500); // Relay needs a little delay
-        }
+
+        if(buffer[2] == 1) {
+          
+          delay(300000); // Wait 5 minutes
+          
+          // Turn on light with arduino client
+          // Connect to client
+          if (client.connect(CLIENT_IP, 3300)) {
+            Serial.println("connected to client");
+            byte buf[2];
+            buf[0] = 1;
+            buf[1] = 1;
+            WriteResponse(buf, sizeof(buf), TURN_ON_LIGHT, true);
+            client.stop();
+          } else {
+            Serial.println("connection failed");
+          }
   
+        }
+
         // Handle RFID
         handleRFID(); // Wait until RFID is scanned
 
-        // send turn off signal to android app
-        byte turnOffData[1];
-        turnOffData[0] = 0;
-        WriteResponse(turnOffData, sizeof(turnOffData), TURN_ON_COFFEE, true);
-
-        // Turn off coffee
-        digitalWrite(RELAY_ON_PIN, LOW);
-        digitalWrite(RELAY_COFFEE_PIN, LOW);
-
-        // Turn off light with arduino client
-        // Connect to client
-        if (client.connect(CLIENT_IP, 3300)) {
-          Serial.println("connected to client");
-          byte buf[2];
-          buf[0] = 1;
-          buf[1] = 0;
-          WriteResponse(buf, sizeof(buf), 1, true);
-          client.stop();
-        } else {
-          Serial.println("connection failed");
+        if(buffer[1] == 1) {
+          // send turn off signal to android app
+          byte turnOffData[1];
+          turnOffData[0] = 0;
+          WriteResponse(turnOffData, sizeof(turnOffData), TURN_OFF_ALARM, false);
+  
+          // Turn off coffee
+          digitalWrite(RELAY_ON_PIN, LOW);
+          digitalWrite(RELAY_COFFEE_PIN, LOW);
         }
+
+        if(buffer[2] == 1) {
+          // Turn off light with arduino client
+          // Connect to client
+          if (client.connect(CLIENT_IP, 3300)) {
+            Serial.println("connected to client");
+            byte buf[2];
+            buf[0] = 1;
+            buf[1] = 0;
+            WriteResponse(buf, sizeof(buf), TURN_ON_LIGHT, true);
+            client.stop();
+          } else {
+            Serial.println("connection failed");
+          }
+        }
+                
         break;
       
 			default:
