@@ -18,6 +18,7 @@ byte mac[] = { 0x40, 0x6c, 0x8f, 0x36, 0x84, 0x8a };
 int ethPort = 3300;
 EthernetServer server(ethPort);
 EthernetClient client;
+#define CLIENT_IP { 192, 168, 2, 106 }
 //-----
 
 //Rf controls here
@@ -101,7 +102,7 @@ void loop()
         
         // Turn on light with arduino client
         // Connect to client
-        if (client.connect({ 192, 168, 2, 106 }, 3300)) {
+        if (client.connect(CLIENT_IP, 3300)) {
           Serial.println("connected to client");
           byte buf[2];
           buf[0] = 1;
@@ -121,18 +122,29 @@ void loop()
         }
   
         // Handle RFID
-        handleRFID();
+        handleRFID(); // Wait until RFID is scanned
+
+        // send turn off signal to android app
+        byte turnOffData[1];
+        turnOffData[0] = 0;
+        WriteResponse(turnOffData, sizeof(turnOffData), TURN_ON_COFFEE, true);
 
         // Turn off coffee
         digitalWrite(RELAY_ON_PIN, LOW);
         digitalWrite(RELAY_COFFEE_PIN, LOW);
 
         // Turn off light with arduino client
-        byte buf[2];
-        buf[0] = 1;
-        buf[1] = 0;
-        WriteResponse(buf, sizeof(buf), 1, true);
-        client.stop();
+        // Connect to client
+        if (client.connect(CLIENT_IP, 3300)) {
+          Serial.println("connected to client");
+          byte buf[2];
+          buf[0] = 1;
+          buf[1] = 0;
+          WriteResponse(buf, sizeof(buf), 1, true);
+          client.stop();
+        } else {
+          Serial.println("connection failed");
+        }
         break;
       
 			default:
@@ -183,29 +195,25 @@ void SwitchOutlet(int outlet, int state)
 }
 void handleRFID()
 {
-    bool isScanned = false;
-    while(!isScanned) {
-      // Look for new cards
-      if ( ! mfrc522.PICC_IsNewCardPresent())
-        return;
+  bool isScanned = false;
+  while(!isScanned) {
+    // Look for new cards
+    if ( ! mfrc522.PICC_IsNewCardPresent())
+      return;
+    
+    // Select one of the cards
+    if ( ! mfrc522.PICC_ReadCardSerial())
+      return;
+
+    if(mfrc522.uid.uidByte[0] == 8) { // If a phone
+      Serial.print(F("Card UID:"));
+      dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
+      Serial.println();
       
-      // Select one of the cards
-      if ( ! mfrc522.PICC_ReadCardSerial())
-        return;
-
-      if(mfrc522.uid.uidByte[0] == 8) { // If a phone
-        Serial.print(F("Card UID:"));
-        dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
-        Serial.println();
-        
-        isScanned = true;
-      }
+      isScanned = true;
     }
-
-    // send turn off signal to android app
-    byte turnOffData[1];
-    turnOffData[0] = 0;
-    WriteResponse(turnOffData, sizeof(turnOffData), TURN_ON_COFFEE, true);
+  }
+  return;
 }
 void dump_byte_array(byte *buffer, byte bufferSize) {
     for (byte i = 0; i < bufferSize; i++) {
