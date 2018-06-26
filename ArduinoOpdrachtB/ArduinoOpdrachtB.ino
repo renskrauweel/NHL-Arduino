@@ -107,6 +107,7 @@ void loop()
           buf[0] = 1;
           buf[1] = 1;
           WriteResponse(buf, sizeof(buf), 1, true);
+          client.stop();
         } else {
           Serial.println("connection failed");
         }
@@ -131,6 +132,7 @@ void loop()
         buf[0] = 1;
         buf[1] = 0;
         WriteResponse(buf, sizeof(buf), 1, true);
+        client.stop();
         break;
       
 			default:
