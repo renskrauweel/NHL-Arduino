@@ -125,6 +125,12 @@ void loop()
         // Turn off coffee
         digitalWrite(RELAY_ON_PIN, LOW);
         digitalWrite(RELAY_COFFEE_PIN, LOW);
+
+        // Turn off light with arduino client
+        byte buf[2];
+        buf[0] = 1;
+        buf[1] = 0;
+        WriteResponse(buf, sizeof(buf), 1, true);
         break;
       
 			default:
