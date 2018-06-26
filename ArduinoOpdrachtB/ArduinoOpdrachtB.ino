@@ -17,6 +17,7 @@
 byte mac[] = { 0x40, 0x6c, 0x8f, 0x36, 0x84, 0x8a };
 int ethPort = 3300;
 EthernetServer server(ethPort);
+EthernetClient client;
 //-----
 
 //Rf controls here
@@ -56,7 +57,6 @@ void setup()
 	mySwitch.enableTransmit(3);
 	Serial.print("IP = ");
 	Serial.println(Ethernet.localIP());
-	Serial.println(analogRead(SENSOR_PIN));
 
 	//Start the ethernet server.
 	server.begin();
@@ -99,6 +99,18 @@ void loop()
           cupPresent = true;
         }
         
+        // Turn on light with arduino client
+        // Connect to client
+        if (client.connect({ 192, 168, 2, 106 }, 3300)) {
+          Serial.println("connected to client");
+          byte buf[2];
+          buf[0] = 1;
+          buf[1] = 1;
+          WriteResponse(buf, sizeof(buf), 1, true);
+        } else {
+          Serial.println("connection failed");
+        }
+        
         // Turn on coffee
         digitalWrite(RELAY_ON_PIN, HIGH);
         if(cupPresent) {
@@ -135,7 +147,7 @@ void PrintArray(byte Printable[], int size)
 	}
 	Serial.println();
 }
-void WriteResponse(byte Data[], int DataSize, int PackageType)
+void WriteResponse(byte Data[], int DataSize, int PackageType, bool toClient)
 {
 	const int responseLength = DataSize + 2;
 	Serial.println(DataSize);
@@ -146,7 +158,11 @@ void WriteResponse(byte Data[], int DataSize, int PackageType)
 	{
 		message[i + 2] = Data[i];
 	}
-	server.write(message, responseLength);
+	if(toClient) {
+    client.write(message, responseLength);
+	} else {
+    server.write(message, responseLength);
+	}
 	Serial.println("Sent data:");
 	PrintArray(message, responseLength);
 }
@@ -181,7 +197,7 @@ void handleRFID()
     // send turn off signal to android app
     byte turnOffData[1];
     turnOffData[0] = 0;
-    WriteResponse(turnOffData, sizeof(turnOffData), TURN_ON_COFFEE);
+    WriteResponse(turnOffData, sizeof(turnOffData), TURN_ON_COFFEE, true);
 }
 void dump_byte_array(byte *buffer, byte bufferSize) {
     for (byte i = 0; i < bufferSize; i++) {
