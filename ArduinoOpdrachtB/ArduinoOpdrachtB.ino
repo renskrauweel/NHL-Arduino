@@ -20,7 +20,7 @@ byte mac[] = { 0x40, 0x6c, 0x8f, 0x36, 0x84, 0x8a };
 int ethPort = 3300;
 EthernetServer server(ethPort);
 EthernetClient client;
-#define CLIENT_IP { 192, 168, 2, 106 }
+#define CLIENT_IP { 192, 168, 2, 101 }
 //-----
 
 //Rf controls here
@@ -106,6 +106,7 @@ void loop()
 
           // Turn on coffee
           digitalWrite(RELAY_ON_PIN, HIGH);
+          cupPresent = false; // DEBUG
           if(cupPresent) {
             delay(60000); // One minute delay to warm up coffee machine
             digitalWrite(RELAY_COFFEE_PIN, HIGH);
@@ -115,7 +116,7 @@ void loop()
 
         if(buffer[2] == 1) {
           
-          delay(300000); // Wait 5 minutes
+          //delay(300000); // Wait 5 minutes
           
           // Turn on light with arduino client
           // Connect to client
@@ -133,7 +134,9 @@ void loop()
         }
 
         // Handle RFID
-        handleRFID(); // Wait until RFID is scanned
+        //handleRFID(); // Wait until RFID is scanned
+
+        delay(5000); // DEBUG
 
         if(buffer[1] == 1) {
           // send turn off signal to android app
@@ -151,6 +154,7 @@ void loop()
           // Connect to client
           if (client.connect(CLIENT_IP, 3300)) {
             Serial.println("connected to client");
+            Serial.println("Sending turn off light signal");
             byte buf[2];
             buf[0] = 1;
             buf[1] = 0;

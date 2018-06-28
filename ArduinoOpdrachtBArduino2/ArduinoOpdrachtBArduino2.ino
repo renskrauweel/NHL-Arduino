@@ -2,7 +2,8 @@
 #include <RCSwitch.h>
 
 //Define packet types here:
-#define POWER_OUTLET 1
+//#define POWER_OUTLET 1
+#define POWER_OUTLET 0x03
 //-----
 
 //Define pins here:
@@ -19,6 +20,7 @@ EthernetServer server(ethPort);
 RCSwitch mySwitch = RCSwitch();
 #define RF_PREFIX "63606"
 String RF_CODES[]{ "28", "36", "26", "34", "25", "33" };
+bool discoModeEnabled = false;
 //-----
 
 void setup()
@@ -40,6 +42,8 @@ void setup()
 }
 void loop()
 {
+  // Disco mode
+  //disco();
 	EthernetClient ethernetClient = server.available();
 	if (!ethernetClient) {
 		return;
@@ -48,6 +52,8 @@ void loop()
 	byte lastPacket[5];
 	while (ethernetClient.connected())
 	{
+    // Disco mode
+    //disco();
 		int counter = 0;
 		while (ethernetClient.available())
 		{
@@ -67,7 +73,14 @@ void loop()
 			switch (buffer[0])
 			{
   			case POWER_OUTLET:
-          SwitchOutlet(1, buffer[1]);
+        Serial.print("Toggling light ");
+        Serial.print(buffer[2]);
+          /*if(buffer[1] == 1){
+            discoModeEnabled = true;
+          } else {
+            discoModeEnabled = false;
+          }*/
+          SwitchOutlet(1, buffer[2]);
           break;
       
 			default:
@@ -75,7 +88,8 @@ void loop()
 				break;
 			}
 		}
-
+    // Disco mode
+    //disco();
 	}
 
 }
@@ -112,3 +126,13 @@ void SwitchOutlet(int outlet, int state)
 	Serial.print(code);
 	mySwitch.send(code.toInt(), 24);
 }
+void disco()
+{
+  if(discoModeEnabled) {
+    SwitchOutlet(1, 1);
+    delay(1000);
+    SwitchOutlet(1, 0);
+    delay(1000);
+  }
+}
+
