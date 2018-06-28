@@ -43,7 +43,7 @@ void setup()
 void loop()
 {
   // Disco mode
-  //disco();
+  disco();
 	EthernetClient ethernetClient = server.available();
 	if (!ethernetClient) {
 		return;
@@ -53,7 +53,7 @@ void loop()
 	while (ethernetClient.connected())
 	{
     // Disco mode
-    //disco();
+    disco();
 		int counter = 0;
 		while (ethernetClient.available())
 		{
@@ -75,12 +75,12 @@ void loop()
   			case POWER_OUTLET:
         Serial.print("Toggling light ");
         Serial.print(buffer[2]);
-          /*if(buffer[1] == 1){
+          if(buffer[2] == 1){
             discoModeEnabled = true;
           } else {
             discoModeEnabled = false;
-          }*/
-          SwitchOutlet(1, buffer[2]);
+          }
+          //SwitchOutlet(1, buffer[2]);
           break;
       
 			default:
@@ -89,7 +89,7 @@ void loop()
 			}
 		}
     // Disco mode
-    //disco();
+    disco();
 	}
 
 }
