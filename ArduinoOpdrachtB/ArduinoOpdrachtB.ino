@@ -135,6 +135,8 @@ void loop()
 
         // Handle RFID
         //handleRFID(); // Wait until RFID is scanned
+        while(digitalRead(7) == 0) {} // Wait
+        
 
         delay(5000); // DEBUG
 
