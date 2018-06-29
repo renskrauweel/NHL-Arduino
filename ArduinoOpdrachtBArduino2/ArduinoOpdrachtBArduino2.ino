@@ -80,7 +80,6 @@ void loop()
           } else {
             discoModeEnabled = false;
           }
-          //SwitchOutlet(1, buffer[2]);
           break;
       
 			default:

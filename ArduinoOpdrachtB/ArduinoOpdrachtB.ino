@@ -106,7 +106,6 @@ void loop()
 
           // Turn on coffee
           digitalWrite(RELAY_ON_PIN, HIGH);
-          cupPresent = false; // DEBUG
           if(cupPresent) {
             delay(60000); // One minute delay to warm up coffee machine
             digitalWrite(RELAY_COFFEE_PIN, HIGH);
@@ -116,7 +115,7 @@ void loop()
 
         if(buffer[2] == 1) {
           
-          //delay(300000); // Wait 5 minutes
+          delay(120000); // Wait 5 minutes
           
           // Turn on light with arduino client
           // Connect to client
@@ -134,11 +133,7 @@ void loop()
         }
 
         // Handle RFID
-        //handleRFID(); // Wait until RFID is scanned
-        while(digitalRead(7) == 0) {} // Wait
-        
-
-        delay(5000); // DEBUG
+        handleRFID(); // Wait until RFID is scanned
 
         if(buffer[1] == 1) {
           // send turn off signal to android app
